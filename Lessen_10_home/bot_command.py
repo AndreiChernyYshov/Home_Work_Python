@@ -2,33 +2,72 @@ from telegram.ext import ConversationHandler
 from telegram import ReplyKeyboardMarkup
 from data import *
 
-START_CHOICE = 0
-SUMMARY = 1
-PHONEBOOK = 1
-PHONEBOOK_CHOICE = 2
-WRITE = 3
-WRITE_DO = 4
-FIND_NUMBER = 3
-FIND_NUMBER_DO = 4
-FIND_NAME = 3
-
 
 def start(update, context):
     reply_keyboard = [['Телефонный справочник', 'Заполнить резюме']]
     update.message.reply_text('Выберите функцию: ',
                               reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-    return START_CHOICE
-
-
-def start_choice(update, context):
-    if update.message.text == 'Телефонный справочник':
-        return PHONEBOOK
-    elif update.message.text == 'Заполнить резюме':
-        return SUMMARY
+    return 0
 
 
 def summary(update, context):
-    print('cвч')
+    reply_keyboard = [['Мужчина', 'Женщина']]
+    update.message.reply_text('Добрый день!\nУкажите свой пол: ',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return 4
+
+
+def gender(update, context):
+    reply_keyboard = [['Пропустить']]
+    update.message.reply_text('Отправьте фото, либо кнопку "Пропустить" для пропуска шага',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return 5
+
+
+def photo(update, context):
+    user = str(update.message.from_user['username'])
+    photo_file = update.message.photo[-1].get_file()
+    photo_file.download(f'{user}_photo.jpg')
+    reply_keyboard = [['Пропустить']]
+    update.message.reply_text('Отправьте свое резюме, либо кнопку "Пропустить" для пропуска шага',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return 6
+
+
+def bio(update, context):
+    user = str(update.message.from_user['username'])
+    with open(user + '_bio.txt', 'w') as f:
+        f.write(update.message.text)
+    reply_keyboard = [['Пропустить']]
+    update.message.reply_text('Отправьте краткое видео о себе, либо кнопку "Пропустить" для пропуска шага',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return 7
+
+
+def video(update, context):
+    user = str(update.message.from_user['username'])
+    video_file = update.message.video.get_file()
+    video_file.download(user + 'video.mp4')
+    update.message.reply_text('Мы с вами свяжемся.')
+    return ConversationHandler.END
+
+
+def skip_photo(update, context):
+    reply_keyboard = [['Пропустить']]
+    update.message.reply_text('Отправьте свое резюме, либо кнопку "Пропустить" для пропуска шага',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return 6
+
+
+def skip_bio(update, context):
+    reply_keyboard = [['Пропустить']]
+    update.message.reply_text('Отправьте краткое видео о себе, либо кнопку "Пропустить" для пропуска шага',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return 7
+
+
+def skip_video(update, context):
+    update.message.reply_text('Мы с вами свяжемся.')
     return ConversationHandler.END
 
 
@@ -37,22 +76,12 @@ def phonebook(update, context):
     reply_keyboard = [['Записать номер', 'Найти номер', 'Найти имя']]
     update.message.reply_text('Выберите функцию: ',
                               reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-    return PHONEBOOK_CHOICE
-
-
-def phonebook_choice(update, context):
-    if update.message.text == 'Записать номер':
-        return WRITE
-    if update.message.text == 'Найти номер':
-        return FIND_NUMBER
-    elif update.message.text == 'Найти имя':
-        update.message.reply_text('Введите Имя: ')
-        return FIND_NAME
+    return 1
 
 
 def write(update, context):
     update.message.reply_text('Введите Номер, а затем Имя через Пробел: ')
-    return WRITE_DO
+    return 2
 
 
 def write_do(update, context):
@@ -62,8 +91,8 @@ def write_do(update, context):
 
 
 def find_number(update, context):
-    update.message.reply_text('Введите Имя: ')
-    return FIND_NUMBER_DO
+    update.message.reply_text('Введите Имя или Номер для поиска: ')
+    return 3
 
 
 def find_number_do(update, context):

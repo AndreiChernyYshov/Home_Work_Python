@@ -8,15 +8,20 @@ updater = Updater(bot_token)
 dispatcher = updater.dispatcher
 
 start_handler = CommandHandler('start', start)
-start_choice_handler = MessageHandler(Filters.regex('^(Телефонный справочник|Заполнить резюме)$'), start_choice)
 
-summary_handler = MessageHandler(Filters.text, start_choice)
+summary_handler = MessageHandler(Filters.regex('^(Заполнить резюме)$'), summary)
+gender_handler = MessageHandler(Filters.regex('^(Мужчина|Женщина)$'), gender)
+photo_handler = MessageHandler(Filters.photo, photo)
+bio_handler = MessageHandler(Filters.text, bio)
+video_handler = MessageHandler(Filters.video, video)
+sp_handler = MessageHandler(Filters.regex('^(Пропустить)$'), skip_photo)
+sb_handler = MessageHandler(Filters.regex('^(Пропустить)$'), skip_bio)
+sv_handler = MessageHandler(Filters.regex('^(Пропустить)$'), skip_video)
 
-phonebook_handler = MessageHandler(Filters.text, phonebook)
-phonebook_choice_handler = MessageHandler(Filters.text, phonebook)
-write_handler = MessageHandler(Filters.text, write)
+phonebook_handler = MessageHandler(Filters.regex('^(Телефонный справочник)$'), phonebook)
+write_handler = MessageHandler(Filters.regex('^(Записать номер)$'), write)
 write_do_handler = MessageHandler(Filters.text, write_do)
-find_number_handler = MessageHandler(Filters.text, find_number)
+find_number_handler = MessageHandler(Filters.regex('^(Найти номер|Найти имя)$'), find_number)
 find_number_do_handler = MessageHandler(Filters.text, find_number_do)
 
 cancel_handler = CommandHandler('cancel', cancel)
@@ -24,13 +29,14 @@ cancel_handler = CommandHandler('cancel', cancel)
 conv_handler = ConversationHandler(
     entry_points=[start_handler],
     states={
-        START_CHOICE: [phonebook_handler, summary_handler],
-        PHONEBOOK: [phonebook_choice_handler],
-        PHONEBOOK_CHOICE: [write_handler, find_number_handler],
-        WRITE: [write_do_handler],
-        WRITE_DO: [write_do_handler],
-        FIND_NUMBER: [find_number_do_handler],
-        FIND_NUMBER_DO: [find_number_do_handler]
+        0: [summary_handler, phonebook_handler],
+        1: [write_handler, find_number_handler],
+        2: [write_do_handler],
+        3: [find_number_do_handler],
+        4: [gender_handler],
+        5: [photo_handler, sp_handler],
+        6: [bio_handler, sb_handler],
+        7: [video_handler, sv_handler]
     },
     fallbacks=[cancel_handler])
 
